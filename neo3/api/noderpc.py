@@ -108,6 +108,8 @@ class GetVersionResponse:
     protocol: VersionProtocol
     rpc_session_enabled: bool
     rpc_max_iterator_results: int
+    standby_committee: Optional[list[cryptography.ECPoint]] = None
+    seed_list: Optional[list[str]] = None
 
     @classmethod
     def from_json(cls, json: dict):
@@ -130,6 +132,12 @@ class GetVersionResponse:
             hf,
         )
         wsport = json.get("wsport", None)
+        standby_committee = p.get("standbycommittee", None)
+        if standby_committee is not None:
+            standby_committee = [
+                cryptography.ECPoint.deserialize_from_bytes(bytes.fromhex(key))
+                for key in standby_committee
+            ]
         return cls(
             json["tcpport"],
             wsport,
@@ -138,6 +146,8 @@ class GetVersionResponse:
             vp,
             json["rpc"]["sessionenabled"],
             json["rpc"]["maxiteratorresultitems"],
+            standby_committee,
+            p.get("seedlist", None),
         )
 
 
